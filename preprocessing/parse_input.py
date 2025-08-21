@@ -37,7 +37,6 @@ def parse_pdf(file_name):
     out_path = BASE_DIR.parent / "outputs" / file_name.split(".")[0]
 
     opts = PdfPipelineOptions(enable_remote_services=True)
-    opts.images_scale = 1
     opts.do_ocr = False
     opts.do_picture_description = True
     opts.do_formula_enrichment = True
