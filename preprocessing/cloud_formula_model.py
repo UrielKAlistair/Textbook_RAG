@@ -27,7 +27,7 @@ class CloudFormulaModel(CodeFormulaModel):
         self.rate_limiter = SimpleRateLimiter(requests_per_minute=10)
 
         load_dotenv()
-        self.api_key = os.environ.get("GEMINI_API_KEY")
+        self.api_key = os.environ.get("GOOGLE_API_KEY")
         self.client = genai.Client(api_key=self.api_key).models
 
         self.models = [
@@ -35,7 +35,7 @@ class CloudFormulaModel(CodeFormulaModel):
             "gemini-2.0-flash",
             "gemini-2.5-flash-lite",
         ]  # Tried in Order
-        self.max_retries = 3
+        self.max_retries = 6
 
         self.code_prompt = """Return only the exact source code. 
         Do not include explanations, text, or markdown fences. 

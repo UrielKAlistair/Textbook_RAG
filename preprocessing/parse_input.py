@@ -14,7 +14,7 @@ import re
 
 def gemini_vlm_options():
     load_dotenv()
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = os.environ.get("GOOGLE_API_KEY")
 
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
