@@ -43,10 +43,21 @@ def generate_embeddings(file_name):
             print(f"Warning: No chunks created for '{section}'. Skipping.")
             continue
 
+        cursor = 0
         for chunk in text_chunks:
+            start_index = content.find(chunk, cursor)  # find from last cursor
+            if start_index == -1:
+                start_index = cursor  # fallback if not found
+            end_index = start_index + len(chunk)
+            cursor = end_index
             all_chunks.append(
                 Document(
-                    page_content=chunk, metadata={"source": str(out_path / section)}
+                    page_content=chunk,
+                    metadata={
+                        "source": str(out_path / section),
+                        "start_index": start_index,
+                        "end_index": end_index,
+                    },
                 )
             )
 

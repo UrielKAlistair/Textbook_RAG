@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from fastapi.responses import RedirectResponse
 import urllib.parse
 
-preprocess = False
+parse = False
+embed = False
 file_name = "Introduction_to_probability-223-266.pdf"
 index_path = f"outputs/{file_name.split(".")[0]}/index"
 app = FastAPI()
@@ -22,11 +23,14 @@ Relevant documents:
 Answer:"""
 
 
-if preprocess:
+if parse:
     from preprocessing.parse_input import parse_pdf
-    from preprocessing.generate_embeddings import generate_embeddings
 
     parse_pdf(file_name)
+
+if embed:
+    from preprocessing.generate_embeddings import generate_embeddings
+
     generate_embeddings(file_name)
 
 
@@ -43,10 +47,20 @@ def load_faiss_index(index_path: str):
 vectorstore = load_faiss_index(index_path)
 
 
+def expand_context(doc, expansion=500):
+    with open(doc.metadata["source"], "r", encoding="utf-8") as f:
+        content = f.read()
+    start = max(0, doc.metadata["start_index"] - expansion)
+    end = min(len(content), doc.metadata["end_index"] + expansion)
+    return content[start:end]
+
+
 @app.get("/query")
 def query_docs(q: str = Query(..., description="User query string")):
     docs = vectorstore.similarity_search(q, k=3)
-    context = "\n\n".join([doc.page_content for doc in docs])
+    expanded = [expand_context(doc, expansion=1000) for doc in docs]
+    context = "\n\n".join(expanded)
     prompt = PROMPT_TEMPLATE.format(question=q, context=context)
-    encoded = urllib.parse.quote(prompt)
-    return RedirectResponse(url=f"https://chat.openai.com/?q={encoded}")
+    # encoded = urllib.parse.quote(prompt)
+    # return RedirectResponse(url=f"https://chat.openai.com/?q={encoded}")
+    return prompt
